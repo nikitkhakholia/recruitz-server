@@ -1,0 +1,19 @@
+class User{
+    constructor(
+        id,
+        name,
+        dob,
+        email,
+        image,
+        currentLocation,
+        preferedLocation,
+        currentSalary,
+        expectedSalary,
+        noticePeriod,
+        about,
+        skills=[],
+        workExperience=[],
+        certificatin=[],
+        education=[],
+        )
+}
