@@ -1,0 +1,5 @@
+CREATE DATABASE recruitz;
+USE recruitz;
+CREATE TABLE user(id int primary key auto_increment,name char(50) not null,dob datetime,email varchar(50) unique not null,image varchar(100),currentLocation varchar(100),preferedLocation varchar(100),currentSalary bigint,expectedSalary bigint,noticePeriod int,about varchar(255));
+CREATE TABLE otp(email varchar(50),otp int,last_changed timestamp default now());
+select * from otp;
