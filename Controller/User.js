@@ -32,8 +32,8 @@ exports.generateOtp = async (req, res) => {
     var otp = Math.floor(100000 + Math.random() * 900000);
     // save otp in database
     var query = `INSERT INTO otp(email,otp) VALUES ('${req.query.email}',${otp});`;
-    database.query(query, async(err, result, fields) => {
-      if(err) return res.json({error: err})
+    database.query(query, async (err, result, fields) => {
+      if (err) return res.json({ error: err });
       // notify user with email
       await sendEmail(
         req.query.email,
@@ -71,4 +71,14 @@ exports.addUser = async (req, res) => {
       );
     }
   }
+};
+
+exports.checkUserRole = (role) => {
+  return (req, res, next) => {
+    if (req.profile.roles.indexOf(role) > -1) {
+      next();
+    } else {
+      return res.json({ error: "You are not an admin" });
+    }
+  };
 };
