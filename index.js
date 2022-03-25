@@ -4,7 +4,7 @@
 // initializing env variables
 require("dotenv").config();
 
-// improting mysql library
+// importing mysql library
 const mysql = require("mysql2");
 const { addUser, checkNewUser, generateOtp } = require("./Controller/User");
 // creating database connection and defining it it a global variable 'database'

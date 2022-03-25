@@ -3,3 +3,19 @@ USE recruitz;
 CREATE TABLE user(id int primary key auto_increment,name char(50) not null,dob datetime,email varchar(50) unique not null,image varchar(100),currentLocation varchar(100),preferedLocation varchar(100),currentSalary bigint,expectedSalary bigint,noticePeriod int,about varchar(255));
 CREATE TABLE otp(email varchar(50),otp int,last_changed timestamp default now());
 select * from otp;
+
+CREATE TABLE `job`.`new_table` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `job_name` CHAR(50) NOT NULL,
+  `job_desc` VARCHAR(100) NOT NULL,
+  `job_type` VARCHAR(50) NOT NULL,
+  `job_vacancy` INT NOT NULL,
+  `job_location` VARCHAR(100) NOT NULL,
+  `no_of_applicants` INT NULL,
+  `company_id` INT NULL,
+  `date_created` DATE NULL,
+  `updated_by` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`));
+
+  
+
