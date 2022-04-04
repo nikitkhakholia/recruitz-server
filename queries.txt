@@ -1,21 +1,38 @@
 CREATE DATABASE recruitz;
 USE recruitz;
-CREATE TABLE user(id int primary key auto_increment,name char(50) not null,dob datetime,email varchar(50) unique not null,image varchar(100),currentLocation varchar(100),preferedLocation varchar(100),currentSalary bigint,expectedSalary bigint,noticePeriod int,about varchar(255));
-CREATE TABLE otp(email varchar(50),otp int,last_changed timestamp default now());
-select * from otp;
 
-CREATE TABLE `job`.`new_table` (
+CREATE TABLE `recruitz`.`login` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `job_name` CHAR(50) NOT NULL,
-  `job_desc` VARCHAR(100) NOT NULL,
-  `job_type` VARCHAR(50) NOT NULL,
-  `job_vacancy` INT NOT NULL,
-  `job_location` VARCHAR(100) NOT NULL,
-  `no_of_applicants` INT NULL,
-  `company_id` INT NULL,
-  `date_created` DATE NULL,
-  `updated_by` VARCHAR(50) NULL,
+  `email` VARCHAR(50) NULL,
+  `encry_pass` TEXT(5000) NULL,
+  `key` VARCHAR(128) NULL,
+  `name` VARCHAR(50) NULL,
   PRIMARY KEY (`id`));
 
-  
+CREATE TABLE `recruitz`.`student` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `about` TEXT(500) NULL,
+  `phone` BIGINT(12) NULL,
+  `dob` DATE NULL,
+  `github` VARCHAR(50) NULL,
+  `linkedin` VARCHAR(50) NULL,
+  `skills` VARCHAR(50) NULL,
+  `login_id` INT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `student-login-fk_idx` (`login_id` ASC) VISIBLE,
+  CONSTRAINT `student-login-fk`
+    FOREIGN KEY (`login_id`)
+    REFERENCES `recruitz`.`login` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
 
+CREATE TABLE `recruitz`.`admin` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `login_id` INT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `admin-login-fk_idx` (`login_id` ASC) VISIBLE,
+  CONSTRAINT `admin-login-fk`
+    FOREIGN KEY (`login_id`)
+    REFERENCES `recruitz`.`login` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
