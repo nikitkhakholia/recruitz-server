@@ -36,3 +36,112 @@ CREATE TABLE `recruitz`.`admin` (
     REFERENCES `recruitz`.`login` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+CREATE TABLE `recruitz`.`job_mst` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `type` VARCHAR(50) NULL,
+  `location` VARCHAR(50) NULL,
+  `company` VARCHAR(50) NULL,
+  `role` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`));
+
+
+CREATE TABLE `recruitz`.`job` (
+  `id` INT NOT NULL,
+  `job_id` INT NULL,
+  `status` CHAR(20) NULL,
+  `description` TEXT(5000) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `job_id_idx` (`job_id` ASC) VISIBLE,
+  CONSTRAINT `job_id`
+    FOREIGN KEY (`job_id`)
+    REFERENCES `recruitz`.`job_mst` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `recruitz`.`application_mst` (
+  `id` INT NOT NULL,
+  `student_id` INT NULL,
+  `job_id` INT NULL,
+  `date_created` DATE NULL,
+  PRIMARY KEY (`id`),
+  INDEX `student_id_fk_idx` (`student_id` ASC) VISIBLE,
+  CONSTRAINT `student_id_fk`
+    FOREIGN KEY (`student_id`)
+    REFERENCES `recruitz`.`student` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `recruitz`.`application` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `application_id` INT NULL,
+  `status` VARCHAR(50) NULL,
+  `date_updated` DATE NULL,
+  PRIMARY KEY (`id`),
+  INDEX `application_id_fk_idx` (`application_id` ASC) VISIBLE,
+  CONSTRAINT `application_id_fk`
+    FOREIGN KEY (`application_id`)
+    REFERENCES `recruitz`.`application_mst` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `recruitz`.`round` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `job_id` INT NULL,
+  `description` TEXT(5000) NULL,
+  `title` VARCHAR(50) NULL,
+  `date_scheduled` DATE NULL,
+  `date_created` DATE NULL,
+  PRIMARY KEY (`id`),
+  INDEX `job_id_fk_idx` (`job_id` ASC) VISIBLE,
+  CONSTRAINT `job_id_fk`
+    FOREIGN KEY (`job_id`)
+    REFERENCES `recruitz`.`job` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+CREATE TABLE `recruitz`.`education` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `institute_name` VARCHAR(50) NULL,
+  `specialization` VARCHAR(50) NULL,
+  `end_date` DATE NULL,
+  `grade` DECIMAL(5,2) NULL,
+  `course` VARCHAR(50) NULL,
+  `student_id` INT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `student_id_fk_idx` (`student_id` ASC) VISIBLE,
+  CONSTRAINT `studentId_fk`
+    FOREIGN KEY (`student_id`)
+    REFERENCES `recruitz`.`student` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `recruitz`.`certificate` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `student_id` INT NULL,
+  `credential_url` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `cert_studId_fk_idx` (`student_id` ASC) VISIBLE,
+  CONSTRAINT `cert_studId_fk`
+    FOREIGN KEY (`student_id`)
+    REFERENCES `recruitz`.`student` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `recruitz`.`work_experience` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(50) NULL,
+  `start_date` DATE NULL,
+  `end_date` DATE NULL,
+  `location` VARCHAR(50) NULL,
+  `description` TEXT(5000) NULL,
+  `student_id` INT NULL,
+  `employment_type` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `work_exp_studId_fk_idx` (`student_id` ASC) VISIBLE,
+  CONSTRAINT `work_exp_studId_fk`
+    FOREIGN KEY (`student_id`)
+    REFERENCES `recruitz`.`student` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
