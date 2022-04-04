@@ -145,3 +145,13 @@ CREATE TABLE `recruitz`.`work_experience` (
     REFERENCES `recruitz`.`student` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+ALTER TABLE `recruitz`.`application_mst` 
+ADD INDEX `app_job_fk_idx` (`job_id` ASC) VISIBLE;
+;
+ALTER TABLE `recruitz`.`application_mst` 
+ADD CONSTRAINT `app_job_fk`
+  FOREIGN KEY (`job_id`)
+  REFERENCES `recruitz`.`job_mst` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
