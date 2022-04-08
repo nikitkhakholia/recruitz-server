@@ -30,36 +30,6 @@ app.use("/newuser", (req, res, next) => {
   }
 });
 
-app.use(
-  "/addCompany/:userId",
-  (req, res, next) => {
-    req.body = { name: "", adress: "" };
-    req.profile = {
-      id: 1,
-      email: "khakholia.nk@gmail.com",
-      roles: ["ROLE_ADMIN"],
-    };
-    next()
-  },
-
-  checkUserRole("ROLE_ADMIN"),
-
-  (req, res) => {
-    //add company
-    database.query(
-      "INSERT INTO company VALUES(1,'Google','Blr')",
-      (err, result, fields) => {
-        if (!err) {
-          res.json({ status: 1 });
-        } else {
-          res.json({ error: err });
-        }
-      }
-    );
-  }
-);
 app.listen(process.env.PORT, async () => {
   console.log(`*** SERVER STARTED AT PORT ${process.env.PORT} ***`);
 });
-
-// checkNewUser()
