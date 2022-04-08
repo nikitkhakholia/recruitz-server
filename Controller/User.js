@@ -1,12 +1,19 @@
 const { sendEmail } = require("../Services/EmailService");
-const User = require("../Models/User");
+const cyrpto = require("crypto")
+const { v4: uuidv4 } = require('uuid');
+
+const encryptPlainPassowrd=(plainpassword)=>{
+  return cyrpto.createHmac("sha256", uuidv4())
+  .update(plainpassword)
+  .digest("hex");
+}
 
 // check if user email is registered
 exports.checkNewUser = async (req, res) => {
   //validate if email is provided
   if (req.query.email) {
     // select all email from user table
-    database.query("SELECT email FROM user;", (err, results, fields) => {
+    database.query("SELECT email FROM login;", (err, results, fields) => {
       // compare all emails with provided
       for (const element of results) {
         if (req.query.email == element) {
@@ -61,13 +68,11 @@ exports.addUser = async (req, res) => {
 
     //compare current otp with provided otp
     if (rows[0] == req.body.otp) {
-      // create and initialize new user
-      var user = new User(req.body);
 
       //save new user in database
       const [rows, fields] = await database.query(
-        "INSERT into USER(name,dob,email,salt) values(?,?,?,?);",
-        [user.name, user.dob, user.email, user.salt]
+        "INSERT into login(email,encry_pass,key,name) values(?,?,?,?);",
+        [req.body.email, encryptPlainPassowrd(req.body.password), req.body.email, uuidv4()]
       );
     }
   }
