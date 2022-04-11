@@ -1,14 +1,19 @@
 CREATE DATABASE recruitz;
 USE recruitz;
 
-CREATE TABLE `recruitz`.`login` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `email` VARCHAR(50) NOT NULL,
-  `encry_pass` VARCHAR(64) NOT NULL,
-  `key` VARCHAR(36) NOT NULL,
-  `name` VARCHAR(50) NOT NULL
- );
-
+CREATE TABLE `login` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(50) NOT NULL UNIQUE,
+  `encry_pass` varchar(64) NOT NULL,
+  `encry_key` varchar(36) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+)
+CREATE TABLE login_role (
+	id int PRIMARY KEY AUTO_INCREMENT,
+	login_id int NOT NULL,
+    role int NOT NULL
+)
 CREATE TABLE `recruitz`.`student` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `about` TEXT(500) NULL,

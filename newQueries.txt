@@ -1,0 +1,44 @@
+CREATE DATABASE recruitz;
+USE recruitz;
+
+CREATE TABLE `login` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(50) NOT NULL UNIQUE,
+  `encry_pass` varchar(64) NOT NULL,
+  `encry_key` varchar(36) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+)
+
+
+
+
+-------------
+not required
+CREATE TABLE login_role (
+	id int PRIMARY KEY AUTO_INCREMENT,
+	login_id int NOT NULL,
+    role int NOT NULL
+)
+-------------
+
+CREATE TABLE `recruitz`.`student` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `login_id` INT NULL,
+  `bio` VARCHAR(255),
+  `about` TEXT(500) ,
+  `github` VARCHAR(255) ,
+  `linkedin` VARCHAR(255) ,
+  `phone` BIGINT ,  
+  `skills` VARCHAR(255) ,
+    FOREIGN KEY (`login_id`)
+    REFERENCES `recruitz`.`login` (`id`)
+);
+
+
+CREATE TABLE `recruitz`.`admin` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `login_id` INT,
+    FOREIGN KEY (`login_id`)
+    REFERENCES `recruitz`.`login` (`id`)
+);

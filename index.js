@@ -21,14 +21,10 @@ global.database = mysql.createConnection({
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
 });
-
 const express = require("express");
 const app = express();
-app.use("/newuser", (req, res, next) => {
-  if (checkNewUser({ query: { email: "khakholia.nk@gmail.com" } }, res)) {
-    generateOtp({ query: { email: "khakholia.nk@gmail.com" } }, res);
-  }
-});
+app.use(require("body-parser").json())
+app.use(require("./Routes/User"));
 
 app.listen(process.env.PORT, async () => {
   console.log(`*** SERVER STARTED AT PORT ${process.env.PORT} ***`);
