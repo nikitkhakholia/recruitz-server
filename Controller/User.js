@@ -197,3 +197,28 @@ exports.checkUserRole = (role) => {
     }
   };
 };
+
+exports.updateUserData=(req, res)=>{
+  var query = `UPDATE student SET ${req.query.field} = "${req.query.data}" WHERE login_id = ${req.profile.id}`
+  database.query(query, (err, updated)=>{
+    console.log(updated);
+    if (err) return res.status(400).json({status: 0, message: err.message})
+    res.json({success: 1, message: updated})
+  })
+}
+exports.getUserById=(req, res, next, id)=>{
+  var query = "SELECT * from login WHERE id = "+id;
+  database.query(query, (err, login)=>{
+    if(!err){
+      var query = "SELECT * FROM student WHERE login_id = "+login[0].id
+      database.query(query, (err, student)=>{
+        if(err) return res.status(400).json({status: 0, message: err.message})
+        req.profile = login
+        req.profile.student = student
+        next()
+      })
+    }else{
+      return res.status(400).json({status:0, message: err.message})
+    }
+  })
+}

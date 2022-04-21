@@ -1,5 +1,5 @@
 const express = require("express");
-const { checkNewUser, generateOtp, addUser, signIn } = require("../Controller/User");
+const { checkNewUser, generateOtp, addUser, signIn, getUserById, updateUserData } = require("../Controller/User");
 
 const router = express.Router()
 
@@ -8,7 +8,8 @@ router.get("/getOtp",generateOtp)
 router.post("/createLogin",addUser)
 router.post("/login",signIn)
 
-
+router.param("id", getUserById)
+router.put("/user/:id", updateUserData)
 
 
 

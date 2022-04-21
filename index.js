@@ -11,6 +11,7 @@ const {
   checkNewUser,
   generateOtp,
   checkUserRole,
+  updateUserData,
 } = require("./Controller/User");
 // creating database connection and defining it it a global variable 'database'
 // so that it can be accessed from any file
