@@ -12,14 +12,13 @@ exports.checkNewUser = async (req, res) => {
   //validate if email is provided
   if (req.query.email) {
     // select all email from user table
-    database.query("SELECT email FROM login;", (err, results, fields) => {
-      // compare all emails with provided
-      for (const element of results) {
-        if (req.query.email == element) {
+    database.query("SELECT email FROM login WHERE email=?",[req.query.email], (err, results, fields) => {
+      // compare  emails with provided
+        if (results.length>0 && req.query.email == results[0].email) {
           // return if matched
           return res.json({ error: "User Already Registered. Please Login." });
         }
-      }
+      
       return res.json({ success: 1 });
     });
 
@@ -42,13 +41,13 @@ exports.generateOtp = async (req, res) => {
       if (err) return res.json({ error: err });
       // notify user with email
       // await
-      sendEmail(
-        req.query.email,
-        "OTP Requested",
-        "Otp is " + otp,
-        "noreply@noreply.com",
-        null
-      );
+      // sendEmail(
+      //   req.query.email,
+      //   "OTP Requested",
+      //   "Otp is " + otp,
+      //   "noreply@noreply.com",
+      //   null
+      // );
 
       // return success response
       res.json({ success: 1 });
@@ -145,12 +144,10 @@ exports.signIn = async (req, res) => {
           encryptPlainPassowrd(req.body.password, login[0].encry_key) ==
           login[0].encry_pass
         ) {
-          console.log(process.env.TOKEN_KEY);
           var token = jwt.sign(
             { id: login[0].id, email: login[0].email, name: login[0].name },
             process.env.TOKEN_KEY
           );
-
           database.query(
             "SELECT * FROM admin WHERE login_id=?",
             [login[0].id],
@@ -183,6 +180,8 @@ exports.signIn = async (req, res) => {
               }
             }
           );
+        }else{
+          return res.status(400).json({status:0, message: "Password or Email does not match."})
         }
       }
     );
