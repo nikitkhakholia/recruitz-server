@@ -23,7 +23,12 @@ global.database = mysql.createConnection({
 });
 const express = require("express");
 const app = express();
+
+const cors = require("cors")
+app.use(cors())
+
 app.use(require("body-parser").json())
+
 app.use(require("./Routes/User"));
 
 app.listen(process.env.PORT, async () => {
