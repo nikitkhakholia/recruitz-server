@@ -213,12 +213,15 @@ exports.getUserById=(req, res, next, id)=>{
       var query = "SELECT * FROM student WHERE login_id = "+login[0].id
       database.query(query, (err, student)=>{
         if(err) return res.status(400).json({status: 0, message: err.message})
-        req.profile = login
-        req.profile.student = student
+        req.profile = login[0]
+        req.profile.student = student[0]
         next()
       })
     }else{
       return res.status(400).json({status:0, message: err.message})
     }
   })
+}
+exports.getStudentData=(req, res)=>{
+  res.json({success:1, data:req.profile})
 }
