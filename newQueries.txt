@@ -10,6 +10,8 @@ CREATE TABLE `login` (
   PRIMARY KEY (`id`)
 )
 
+ALTER TABLE `recruitz`.`login` 
+ADD COLUMN `photo_url` VARCHAR(255) NULL AFTER `name`;
 
 
 'CREATE TABLE `otp` (

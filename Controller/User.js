@@ -12,15 +12,19 @@ exports.checkNewUser = async (req, res) => {
   //validate if email is provided
   if (req.query.email) {
     // select all email from user table
-    database.query("SELECT email FROM login WHERE email=?",[req.query.email], (err, results, fields) => {
-      // compare  emails with provided
-        if (results.length>0 && req.query.email == results[0].email) {
+    database.query(
+      "SELECT email FROM login WHERE email=?",
+      [req.query.email],
+      (err, results, fields) => {
+        // compare  emails with provided
+        if (results.length > 0 && req.query.email == results[0].email) {
           // return if matched
           return res.json({ error: "User Already Registered. Please Login." });
         }
-      
-      return res.json({ success: 1 });
-    });
+
+        return res.json({ success: 1 });
+      }
+    );
 
     // return success
   } else {
@@ -87,13 +91,49 @@ exports.addUser = async (req, res) => {
                 "SELECT * FROM login WHERE id = ? ",
                 [loginInsert.insertId],
                 (err, login) => {
-                  if (err) return res.status(400).json({ status: 0, message: err }); 
+                  if (err)
+                    return res.status(400).json({ status: 0, message: err });
                   if (true) {
-                    
                     database.query(
                       "INSERT INTO student(login_id, bio, about, github, linkedin, phone, skills) VALUES(?,?,?,?,?,?,?)",
                       [login[0].id, "", "", "", "", null, ""],
                       (err, student) => {
+                        // database.query(
+                        //   "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`) VALUES ('?', '?', '?', '?', '?', '?')",
+                        //   ["", "", "", "", "", student.insertedId]
+                        //   //   (err, result)=>{
+                        //   //   console.log(err);
+                        //   //   if (err) return res.status(400).json({status: 0, message: err.message})
+                        //   //   res.json({success: 1, message: updated})
+                        //   // }
+                        // );
+
+                        // database.query(
+                        //   "INSERT INTO `recruitz`.`work_experience` (`title`, `start_date`, `end_date`, `location`, `description`, `student_id`, `employment_type`) VALUES ('?', '?', '?', '?', '?', '?', '?')",
+                        //   ["", "", "", "", "", student.insertedId, ""]
+                        //   // (err, result) => {
+                        //   //   console.log(err);
+                        //   //   if (err)
+                        //   //     return res
+                        //   //       .status(400)
+                        //   //       .json({ status: 0, message: err.message });
+                        //   //   res.json({ success: 1, message: updated });
+                        //   // }
+                        // );
+
+                        // database.query(
+                        //   "INSERT INTO `recruitz`.`certificate` (`student_id`, `credential_url`) VALUES ('?', '?')",
+                        //   ["", student.insertedId],
+                        //   // (err, result) => {
+                        //   //   console.log(err);
+                        //   //   if (err)
+                        //   //     return res
+                        //   //       .status(400)
+                        //   //       .json({ status: 0, message: err.message });
+                        //   //   res.json({ success: 1, message: updated });
+                        //   // }
+                        // );
+
                         if (err)
                           return res
                             .status(400)
@@ -130,6 +170,7 @@ exports.addUser = async (req, res) => {
 };
 
 exports.signIn = async (req, res) => {
+  console.log(1111);
   if (req.body.email && req.body.password) {
     database.query(
       "SELECT * FROM login WHERE email = ? ",
@@ -180,8 +221,10 @@ exports.signIn = async (req, res) => {
               }
             }
           );
-        }else{
-          return res.status(400).json({status:0, message: "Password or Email does not match."})
+        } else {
+          return res
+            .status(400)
+            .json({ status: 0, message: "Password or Email does not match." });
         }
       }
     );
@@ -198,30 +241,86 @@ exports.checkUserRole = (role) => {
   };
 };
 
-exports.updateUserData=(req, res)=>{
-  var query = `UPDATE student SET ${req.query.field} = "${req.query.data}" WHERE login_id = ${req.profile.id}`
-  database.query(query, (err, updated)=>{
-    console.log(updated);
-    if (err) return res.status(400).json({status: 0, message: err.message})
-    res.json({success: 1, message: updated})
-  })
-}
-exports.getUserById=(req, res, next, id)=>{
-  var query = "SELECT * from login WHERE id = "+id;
-  database.query(query, (err, login)=>{
-    if(!err){
-      var query = "SELECT * FROM student WHERE login_id = "+login[0].id
-      database.query(query, (err, student)=>{
-        if(err) return res.status(400).json({status: 0, message: err.message})
-        req.profile = login[0]
-        req.profile.student = student[0]
-        next()
-      })
-    }else{
-      return res.status(400).json({status:0, message: err.message})
+exports.updateUserData = (req, res) => {
+  var query = `UPDATE student SET ${req.query.field} = "${req.query.data}" WHERE login_id = ${req.profile.id}`;
+  database.query(query, (err, updated) => {
+    if (err) return res.status(400).json({ status: 0, message: err.message });
+    res.json({ success: 1, message: updated });
+  });
+};
+exports.getUserById = (req, res, next, id) => {
+  var query = "SELECT * from login WHERE id = " + id;
+  database.query(query, (err, login) => {
+    if (!err) {
+      var query = "SELECT * FROM student WHERE login_id = " + login[0].id;
+      database.query(query, (err, student) => {
+        if (err)
+          return res.status(400).json({ status: 0, message: err.message });
+        req.profile = login[0];
+        req.profile.student = student[0];
+        next();
+      });
+    } else {
+      return res.status(400).json({ status: 0, message: err.message });
     }
-  })
-}
-exports.getStudentData=(req, res)=>{
-  res.json({success:1, data:req.profile})
-}
+  });
+};
+exports.getStudentData = (req, res) => {
+  delete req.profile.encry_pass;
+  delete req.profile.encry_key;
+  res.json({ success: 1, data: req.profile });
+};
+exports.addEducationForStudenr = (req, res) => {
+  var query =
+    "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`) VALUES ('?', '?', '?', '?', '?', '?')";
+  database.query(
+    query,
+    [
+      req.body.insName,
+      req.body.spe,
+      req.body.ed,
+      req.body.gd,
+      req.body.deg,
+      req.profile.student.id,
+    ],
+    (err, result) => {
+      console.log(err);
+      if (err) return res.status(400).json({ status: 0, message: err.message });
+      res.json({ success: 1, message: updated });
+    }
+  );
+};
+exports.addWEForStudenr = (req, res) => {
+  var query =
+    "INSERT INTO `recruitz`.`work_experience` (`title`, `start_date`, `end_date`, `location`, `description`, `student_id`, `employment_type`) VALUES ('?', '?', '?', '?', '?', '?', '?')";
+  database.query(
+    query,
+    [
+      req.body.title,
+      req.body.sd,
+      req.body.ed,
+      req.body.loc,
+      req.body.dec,
+      req.profile.student.id,
+      req.body.et,
+    ],
+    (err, result) => {
+      console.log(err);
+      if (err) return res.status(400).json({ status: 0, message: err.message });
+      res.json({ success: 1, message: updated });
+    }
+  );
+};
+exports.addEducationForStudenr = (req, res) => {
+  var query =
+    "INSERT INTO `recruitz`.`certificate` (`student_id`, `credential_url`) VALUES ('?', '?')";
+  database.query(
+    query,
+    [req.query.link, req.profile.student.id],
+    (err, result) => {
+      console.log(err);
+      if (err) return res.status(400).json({ status: 0, message: err.message });
+      res.json({ success: 1, message: updated });
+    }
+  );
+};
