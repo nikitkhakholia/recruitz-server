@@ -35,6 +35,7 @@ app.use((req, res, next)=>{
   }, 2000)
 })
 app.use(require("./Routes/User"));
+app.use(require("./Routes/Application"))
 
 
 app.listen(process.env.PORT, async () => {

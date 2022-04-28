@@ -18,6 +18,7 @@
     },
     "homepage": "https://github.com/nikitkhakholia/recruitz-server#readme",
     "dependencies": {
+        "async": "^3.2.3",
         "body-parser": "^1.20.0",
         "cors": "^2.8.5",
         "dotenv": "^16.0.0",

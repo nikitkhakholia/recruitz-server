@@ -10,6 +10,7 @@ const {
   addEducationForStudenr,
   addWEForStudenr,
   addCertificateForStudenr,
+  getAllUsers,
 } = require("../Controller/User");
 const { sendExcelFile } = require("../Services/ExcelService");
 
@@ -27,16 +28,8 @@ router.put("/user/cer/:id", addCertificateForStudenr);
 router.put("/user/workexp/:id", addWEForStudenr);
 router.put("/user/edu/:id", addEducationForStudenr);
 
-router.get("/testexcel", (req, res) => {
-  sendExcelFile(
-    [
-      [1, "Nik", "Blr"],
-      [2, "Bijesh", "Blr"],
-      [3, "Anush" , "Blr"],
-    ],
-    ["col1", "col2"],
-    res
-  );
+router.get("/users/:id", (req, res) => {
+  getAllUsers(req, res)
 });
 
 module.exports = router;

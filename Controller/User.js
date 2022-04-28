@@ -4,6 +4,7 @@ const async = require("async");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 const xl = require('excel4node');
+const { sendExcelFile } = require("../Services/ExcelService");
 
 const encryptPlainPassowrd = (plainpassword, key) => {
   return cyrpto.createHmac("sha256", key).update(plainpassword).digest("hex");
@@ -283,23 +284,6 @@ exports.getStudentData = (req, res) => {
   delete req.profile.encry_key;
   res.json({ success: 1, data: req.profile });
 };
-exports.getAllUsers=(req, res)=>{
-  const wb = new xl.Workbook();
-    database.query("SELECT * from login",(err, logins)=>{
-      if (err) res.status(400).json({success: 0, error: err})
-      async
-    })
-}
-
-
-
-
-
-
-
-
-
-
 exports.addEducationForStudenr = (req, res) => {
   var query =
     "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`,`start_date`) VALUES (?, ?, ?, ?, ?, ?,?)";
@@ -353,3 +337,24 @@ exports.addCertificateForStudenr = (req, res) => {
     }
   );
 };
+
+
+exports.getAllUsers=(req, res)=>{
+  const wb = new xl.Workbook();
+    database.query("SELECT * from login",(err, logins)=>{
+      if (err) res.status(400).json({success: 0, error: err})
+      var data = [];
+      var cols = ["Login Id", "Login Email", "Name", "Bio", "About", "Github", "Linked In", "Phone", "Skills"]
+      async.forEach(logins, (login, done)=>{
+        database.query("SELECT * from student WHERE login_id="+login.id, (err, student)=>{
+          // console.log(student);
+          student=student[0]
+          data.push([login.id,login.email, login.name, student.bio, student.about, student.github, student.linkedin, student.phone, student.skills])
+          done()
+        })
+      },err=>{
+        if (err) console.log(err);
+        sendExcelFile(data, cols, res, "Student@"+new Date().toLocaleString())
+      })
+    })
+}
