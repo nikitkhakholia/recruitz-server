@@ -10,23 +10,12 @@ CREATE TABLE `login` (
   PRIMARY KEY (`id`)
 )
 
-ALTER TABLE `recruitz`.`login` 
-ADD COLUMN `photo_url` VARCHAR(255) NULL AFTER `name`;
-
 
 'CREATE TABLE `otp` (
   `email` varchar(50) DEFAULT NULL,
   `otp` int DEFAULT NULL,
   `last_changed` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 )
--------------
-not required
-CREATE TABLE login_role (
-	id int PRIMARY KEY AUTO_INCREMENT,
-	login_id int NOT NULL,
-    role int NOT NULL
-)
--------------
 
 CREATE TABLE `recruitz`.`student` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,

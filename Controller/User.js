@@ -1,7 +1,9 @@
 const { sendEmail } = require("../Services/EmailService");
 const cyrpto = require("crypto");
+const async = require("async");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
+const xl = require('excel4node');
 
 const encryptPlainPassowrd = (plainpassword, key) => {
   return cyrpto.createHmac("sha256", key).update(plainpassword).digest("hex");
@@ -102,7 +104,6 @@ exports.addUser = async (req, res) => {
                         //   "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`) VALUES ('?', '?', '?', '?', '?', '?')",
                         //   ["", "", "", "", "", student.insertedId]
                         //   //   (err, result)=>{
-                        //   //   console.log(err);
                         //   //   if (err) return res.status(400).json({status: 0, message: err.message})
                         //   //   res.json({success: 1, message: updated})
                         //   // }
@@ -112,7 +113,6 @@ exports.addUser = async (req, res) => {
                         //   "INSERT INTO `recruitz`.`work_experience` (`title`, `start_date`, `end_date`, `location`, `description`, `student_id`, `employment_type`) VALUES ('?', '?', '?', '?', '?', '?', '?')",
                         //   ["", "", "", "", "", student.insertedId, ""]
                         //   // (err, result) => {
-                        //   //   console.log(err);
                         //   //   if (err)
                         //   //     return res
                         //   //       .status(400)
@@ -125,7 +125,6 @@ exports.addUser = async (req, res) => {
                         //   "INSERT INTO `recruitz`.`certificate` (`student_id`, `credential_url`) VALUES ('?', '?')",
                         //   ["", student.insertedId],
                         //   // (err, result) => {
-                        //   //   console.log(err);
                         //   //   if (err)
                         //   //     return res
                         //   //       .status(400)
@@ -170,7 +169,6 @@ exports.addUser = async (req, res) => {
 };
 
 exports.signIn = async (req, res) => {
-  console.log(1111);
   if (req.body.email && req.body.password) {
     database.query(
       "SELECT * FROM login WHERE email = ? ",
@@ -249,16 +247,31 @@ exports.updateUserData = (req, res) => {
   });
 };
 exports.getUserById = (req, res, next, id) => {
+  
   var query = "SELECT * from login WHERE id = " + id;
   database.query(query, (err, login) => {
+    
     if (!err) {
       var query = "SELECT * FROM student WHERE login_id = " + login[0].id;
       database.query(query, (err, student) => {
         if (err)
           return res.status(400).json({ status: 0, message: err.message });
-        req.profile = login[0];
+        if(student[0]){
+          req.profile = login[0];
         req.profile.student = student[0];
-        next();
+        var query = `SELECT * FROM recruitz.certificate WHERE student_id = ${student[0].id};`
+        database.query(query, (err, certificate)=>{
+          if(certificate.length>0)req.profile.student.certificates=certificate
+          database.query("SELECT * FROM recruitz.work_experience WHERE student_id="+student[0].id, (err, workExperience)=>{
+            if(workExperience.length>0) req.profile.student.workExperiences = workExperience
+            database.query("SELECT * FROM recruitz.education WHERE student_id="+student[0].id, (err, education)=>{
+              if(education.length>0) req.profile.student.educations=education
+              next()
+            })
+          })
+        })
+        }
+        
       });
     } else {
       return res.status(400).json({ status: 0, message: err.message });
@@ -270,57 +283,73 @@ exports.getStudentData = (req, res) => {
   delete req.profile.encry_key;
   res.json({ success: 1, data: req.profile });
 };
+exports.getAllUsers=(req, res)=>{
+  const wb = new xl.Workbook();
+    database.query("SELECT * from login",(err, logins)=>{
+      if (err) res.status(400).json({success: 0, error: err})
+      async
+    })
+}
+
+
+
+
+
+
+
+
+
+
 exports.addEducationForStudenr = (req, res) => {
   var query =
-    "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`) VALUES ('?', '?', '?', '?', '?', '?')";
+    "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`,`start_date`) VALUES (?, ?, ?, ?, ?, ?,?)";
   database.query(
     query,
     [
       req.body.insName,
       req.body.spe,
-      req.body.ed,
+      req.body.ed?req.body.ed:null,
       req.body.gd,
       req.body.deg,
       req.profile.student.id,
+      req.body.sd
     ],
     (err, result) => {
-      console.log(err);
       if (err) return res.status(400).json({ status: 0, message: err.message });
-      res.json({ success: 1, message: updated });
+      res.json({ success: 1});
     }
   );
 };
 exports.addWEForStudenr = (req, res) => {
   var query =
-    "INSERT INTO `recruitz`.`work_experience` (`title`, `start_date`, `end_date`, `location`, `description`, `student_id`, `employment_type`) VALUES ('?', '?', '?', '?', '?', '?', '?')";
+    "INSERT INTO `recruitz`.`work_experience` (`title`, `start_date`, `end_date`, `location`, `description`, `student_id`, `employment_type`, `company`) VALUES (?, ?, ?, ?, ?, ?, ?,?)";
   database.query(
     query,
     [
       req.body.title,
       req.body.sd,
-      req.body.ed,
+      req.body.ed?req.body.ed:null,
       req.body.loc,
       req.body.dec,
       req.profile.student.id,
       req.body.et,
+      req.body.com
     ],
     (err, result) => {
-      console.log(err);
       if (err) return res.status(400).json({ status: 0, message: err.message });
-      res.json({ success: 1, message: updated });
+      res.json({ success: 1});
     }
   );
 };
-exports.addEducationForStudenr = (req, res) => {
+exports.addCertificateForStudenr = (req, res) => {
   var query =
-    "INSERT INTO `recruitz`.`certificate` (`student_id`, `credential_url`) VALUES ('?', '?')";
+    `INSERT INTO recruitz.certificate (student_id, credential_url) VALUES (${req.profile.student.id}, '${req.body.link}')`;
   database.query(
     query,
-    [req.query.link, req.profile.student.id],
+    [ req.profile.student.id, req.body.link],
     (err, result) => {
-      console.log(err);
       if (err) return res.status(400).json({ status: 0, message: err.message });
-      res.json({ success: 1, message: updated });
+      res.json({ success: 1,  });
     }
   );
 };

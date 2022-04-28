@@ -29,8 +29,13 @@ const cors = require("cors")
 app.use(cors())
 
 app.use(require("body-parser").json())
-
+app.use((req, res, next)=>{
+  setTimeout(()=>{
+    next()
+  }, 2000)
+})
 app.use(require("./Routes/User"));
+
 
 app.listen(process.env.PORT, async () => {
   console.log(`*** SERVER STARTED AT PORT ${process.env.PORT} ***`);
