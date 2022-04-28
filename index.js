@@ -37,7 +37,6 @@ app.use((req, res, next)=>{
 app.use(require("./Routes/User"));
 app.use(require("./Routes/Application"))
 
-
 app.listen(process.env.PORT, async () => {
   console.log(`*** SERVER STARTED AT PORT ${process.env.PORT} ***`);
 });
