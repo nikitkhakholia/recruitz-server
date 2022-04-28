@@ -8,7 +8,6 @@ exports.sendExcelFile = (data, cols, res, filename) => {
   });
   data.forEach((row, rowNo) => {
     row.forEach((value, colNo) => {
-      console.log(value);
       ws.cell(rowNo + 2, colNo + 1).string(value ? value.toString() : "");
     });
   });

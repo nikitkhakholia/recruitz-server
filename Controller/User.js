@@ -354,7 +354,8 @@ exports.getAllUsers=(req, res)=>{
         })
       },err=>{
         if (err) console.log(err);
-        sendExcelFile(data, cols, res, "Student@"+new Date().toLocaleString())
+        if(req.query.download=='true') sendExcelFile(data, cols, res, "Student@"+new Date().toLocaleString())
+        else res.json({data: data, success: 1})
       })
     })
 }

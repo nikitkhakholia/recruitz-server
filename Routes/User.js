@@ -28,8 +28,6 @@ router.put("/user/cer/:id", addCertificateForStudenr);
 router.put("/user/workexp/:id", addWEForStudenr);
 router.put("/user/edu/:id", addEducationForStudenr);
 
-router.get("/users/:id", (req, res) => {
-  getAllUsers(req, res)
-});
+router.get("/users/:id", getAllUsers);
 
 module.exports = router;
