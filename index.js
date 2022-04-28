@@ -32,6 +32,7 @@ app.use(require("body-parser").json())
 
 app.use(require("./Routes/User"));
 app.use(require("./Routes/Application"))
+app.use(require("./Routes/Job"));
 
 app.listen(process.env.PORT, async () => {
   console.log(`*** SERVER STARTED AT PORT ${process.env.PORT} ***`);
