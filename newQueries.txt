@@ -1,39 +1,80 @@
 CREATE DATABASE recruitz;
 USE recruitz;
 
-CREATE TABLE `login` (
+
+'CREATE TABLE `login` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `email` varchar(50) NOT NULL UNIQUE,
+  `email` varchar(50) NOT NULL,
   `encry_pass` varchar(64) NOT NULL,
   `encry_key` varchar(36) NOT NULL,
   `name` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`)
-)
-
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
 
 'CREATE TABLE `otp` (
   `email` varchar(50) DEFAULT NULL,
   `otp` int DEFAULT NULL,
   `last_changed` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 )
+'CREATE TABLE `student` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `login_id` int DEFAULT NULL,
+  `bio` varchar(255) DEFAULT NULL,
+  `about` text,
+  `github` varchar(255) DEFAULT NULL,
+  `linkedin` varchar(255) DEFAULT NULL,
+  `phone` bigint DEFAULT NULL,
+  `skills` varchar(255) DEFAULT NULL,
+  `photo_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `login_id` (`login_id`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`login_id`) REFERENCES `login` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
 
-CREATE TABLE `recruitz`.`student` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `login_id` INT NULL,
-  `bio` VARCHAR(255),
-  `about` TEXT(500) ,
-  `github` VARCHAR(255) ,
-  `linkedin` VARCHAR(255) ,
-  `phone` BIGINT ,  
-  `skills` VARCHAR(255) ,
-    FOREIGN KEY (`login_id`)
-    REFERENCES `recruitz`.`login` (`id`)
-);
 
+'CREATE TABLE `admin` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `login_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `login_id` (`login_id`),
+  CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`login_id`) REFERENCES `login` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
 
-CREATE TABLE `recruitz`.`admin` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `login_id` INT,
-    FOREIGN KEY (`login_id`)
-    REFERENCES `recruitz`.`login` (`id`)
-);
+'CREATE TABLE `certificate` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int NOT NULL,
+  `credential_url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cert_studId_fk_idx` (`student_id`),
+  CONSTRAINT `cert_studId_fk` FOREIGN KEY (`student_id`) REFERENCES `student` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
+
+'CREATE TABLE `work_experience` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(50) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `location` varchar(50) NOT NULL,
+  `description` text,
+  `student_id` int NOT NULL,
+  `employment_type` varchar(50) NOT NULL,
+  `company` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `work_exp_studId_fk_idx` (`student_id`),
+  CONSTRAINT `work_exp_studId_fk` FOREIGN KEY (`student_id`) REFERENCES `student` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
+
+'CREATE TABLE `education` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `institute_name` varchar(100) NOT NULL,
+  `specialization` varchar(100) NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `grade` decimal(5,2) DEFAULT NULL,
+  `degree` varchar(100) DEFAULT NULL,
+  `student_id` int NOT NULL,
+  `start_date` date NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `student_id_fk_idx` (`student_id`),
+  CONSTRAINT `studentId_fk` FOREIGN KEY (`student_id`) REFERENCES `student` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
