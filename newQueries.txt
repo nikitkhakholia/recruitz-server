@@ -78,3 +78,28 @@ USE recruitz;
   KEY `student_id_fk_idx` (`student_id`),
   CONSTRAINT `studentId_fk` FOREIGN KEY (`student_id`) REFERENCES `student` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
+
+
+
+'CREATE TABLE `application_mst` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int NOT NULL,
+  `job_id` int NOT NULL,
+  `date_created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `student_id_fk` (`student_id`),
+  KEY `job_id` (`job_id`),
+  CONSTRAINT `application_mst_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `job_mst` (`id`),
+  CONSTRAINT `student_id_fk` FOREIGN KEY (`student_id`) REFERENCES `student` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
+
+'CREATE TABLE `application` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `application_id` int NOT NULL,
+  `status` varchar(50) DEFAULT ''Applied'',
+  `date_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id_fk` (`application_id`),
+  CONSTRAINT `application_id_fk` FOREIGN KEY (`application_id`) REFERENCES `application_mst` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
+
