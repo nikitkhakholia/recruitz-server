@@ -3,8 +3,9 @@ const cyrpto = require("crypto");
 const async = require("async");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
-const xl = require('excel4node');
-const { sendExcelFile } = require("../Services/ExcelService");
+const xl = require("excel4node");
+const { sendExcelFile, readExcelFile } = require("../Services/ExcelService");
+const formidable = require("formidable");
 
 const encryptPlainPassowrd = (plainpassword, key) => {
   return cyrpto.createHmac("sha256", key).update(plainpassword).digest("hex");
@@ -248,31 +249,39 @@ exports.updateUserData = (req, res) => {
   });
 };
 exports.getUserById = (req, res, next, id) => {
-  
   var query = "SELECT * from login WHERE id = " + id;
   database.query(query, (err, login) => {
-    
     if (!err) {
       var query = "SELECT * FROM student WHERE login_id = " + login[0].id;
       database.query(query, (err, student) => {
         if (err)
           return res.status(400).json({ status: 0, message: err.message });
-        if(student[0]){
+        if (student[0]) {
           req.profile = login[0];
-        req.profile.student = student[0];
-        var query = `SELECT * FROM recruitz.certificate WHERE student_id = ${student[0].id};`
-        database.query(query, (err, certificate)=>{
-          if(certificate.length>0)req.profile.student.certificates=certificate
-          database.query("SELECT * FROM recruitz.work_experience WHERE student_id="+student[0].id, (err, workExperience)=>{
-            if(workExperience.length>0) req.profile.student.workExperiences = workExperience
-            database.query("SELECT * FROM recruitz.education WHERE student_id="+student[0].id, (err, education)=>{
-              if(education.length>0) req.profile.student.educations=education
-              next()
-            })
-          })
-        })
+          req.profile.student = student[0];
+          var query = `SELECT * FROM recruitz.certificate WHERE student_id = ${student[0].id};`;
+          database.query(query, (err, certificate) => {
+            if (certificate.length > 0)
+              req.profile.student.certificates = certificate;
+            database.query(
+              "SELECT * FROM recruitz.work_experience WHERE student_id=" +
+                student[0].id,
+              (err, workExperience) => {
+                if (workExperience.length > 0)
+                  req.profile.student.workExperiences = workExperience;
+                database.query(
+                  "SELECT * FROM recruitz.education WHERE student_id=" +
+                    student[0].id,
+                  (err, education) => {
+                    if (education.length > 0)
+                      req.profile.student.educations = education;
+                    next();
+                  }
+                );
+              }
+            );
+          });
         }
-        
       });
     } else {
       return res.status(400).json({ status: 0, message: err.message });
@@ -292,15 +301,15 @@ exports.addEducationForStudenr = (req, res) => {
     [
       req.body.insName,
       req.body.spe,
-      req.body.ed?req.body.ed:null,
+      req.body.ed ? req.body.ed : null,
       req.body.gd,
       req.body.deg,
       req.profile.student.id,
-      req.body.sd
+      req.body.sd,
     ],
     (err, result) => {
       if (err) return res.status(400).json({ status: 0, message: err.message });
-      res.json({ success: 1});
+      res.json({ success: 1 });
     }
   );
 };
@@ -312,50 +321,146 @@ exports.addWEForStudenr = (req, res) => {
     [
       req.body.title,
       req.body.sd,
-      req.body.ed?req.body.ed:null,
+      req.body.ed ? req.body.ed : null,
       req.body.loc,
       req.body.dec,
       req.profile.student.id,
       req.body.et,
-      req.body.com
+      req.body.com,
     ],
     (err, result) => {
       if (err) return res.status(400).json({ status: 0, message: err.message });
-      res.json({ success: 1});
+      res.json({ success: 1 });
     }
   );
 };
 exports.addCertificateForStudenr = (req, res) => {
-  var query =
-    `INSERT INTO recruitz.certificate (student_id, credential_url) VALUES (${req.profile.student.id}, '${req.body.link}')`;
+  var query = `INSERT INTO recruitz.certificate (student_id, credential_url) VALUES (${req.profile.student.id}, '${req.body.link}')`;
   database.query(
     query,
-    [ req.profile.student.id, req.body.link],
+    [req.profile.student.id, req.body.link],
     (err, result) => {
       if (err) return res.status(400).json({ status: 0, message: err.message });
-      res.json({ success: 1,  });
+      res.json({ success: 1 });
     }
   );
 };
 
-
-exports.getAllUsers=(req, res)=>{
+exports.getAllUsers = (req, res) => {
   const wb = new xl.Workbook();
-    database.query("SELECT * from login",(err, logins)=>{
-      if (err) res.status(400).json({success: 0, error: err})
-      var data = [];
-      var cols = ["Login Id", "Login Email", "Name", "Bio", "About", "Github", "Linked In", "Phone", "Skills"]
-      async.forEach(logins, (login, done)=>{
-        database.query("SELECT * from student WHERE login_id="+login.id, (err, student)=>{
-          // console.log(student);
-          student=student[0]
-          data.push([login.id,login.email, login.name, student.bio, student.about, student.github, student.linkedin, student.phone, student.skills])
-          done()
-        })
-      },err=>{
+  database.query("SELECT * from login", (err, logins) => {
+    if (err) res.status(400).json({ success: 0, error: err });
+    var data = [];
+    var cols = [
+      "Login Id",
+      "Login Email",
+      "Name",
+      "Bio",
+      "About",
+      "Github",
+      "Linked In",
+      "Phone",
+      "Skills",
+    ];
+    async.forEach(
+      logins,
+      (login, done) => {
+        database.query(
+          "SELECT * from student WHERE login_id=" + login.id,
+          (err, student) => {
+            // console.log(student);
+            student = student[0];
+            data.push([
+              login.id,
+              login.email,
+              login.name,
+              student.bio,
+              student.about,
+              student.github,
+              student.linkedin,
+              student.phone,
+              student.skills,
+            ]);
+            done();
+          }
+        );
+      },
+      (err) => {
         if (err) console.log(err);
-        if(req.query.download=='true') sendExcelFile(data, cols, res, "Student@"+new Date().toLocaleString())
-        else res.json({data: data, success: 1})
-      })
-    })
-}
+        if (req.query.download == "true")
+          sendExcelFile(
+            data,
+            cols,
+            res,
+            "Student@" + new Date().toLocaleString()
+          );
+        else res.json({ data: data, success: 1 });
+      }
+    );
+  });
+};
+exports.addUsersByExcel = (req, res) => {
+  var success = { result: [] };
+  var form = new formidable.IncomingForm();
+  form.parse(req, async (err, fields, files) => {
+    var data = await readExcelFile(files.file1);
+    async.forEach(
+      data,
+      (user, done) => {
+        var key = uuidv4();
+        database.query(
+          "INSERT into login(email,encry_pass,encry_key,name) values(?,?,?,?);",
+          [
+            user["Login Email"],
+            encryptPlainPassowrd("12345678", key),
+            key,
+            user["Name"],
+          ],
+          (err, loginInsert) => {
+            if (err && err.code == "ER_DUP_ENTRY") {
+              success.result.push({
+                user: user["Login Email"],
+                error: "User Already Exists.",
+              });
+              done();
+            } else if (err) {
+              success.result.push({ user: user["Login Email"], error: err });
+              done();
+            } else {
+              database.query(
+                "INSERT INTO student(login_id, bio, about, github, linkedin, phone, skills) VALUES(?,?,?,?,?,?,?)",
+                [
+                  loginInsert.insertId,
+                  user["Bio"],
+                  user["About"],
+                  user["Github"],
+                  user["Linked In"],
+                  parseInt(user["Phone"]),
+                  user["Skills"],
+                ],
+                (err, student) => {
+                  if (err) {
+                    success.result.push({
+                      user: user["Login Email"],
+                      error: err,
+                    });
+                    done();
+                  } else {
+                    success.result.push({
+                      user: user["Login Email"],
+                      error: "Added Successfully.",
+                    });
+                    done();
+                  }
+                }
+              );
+            }
+          }
+        );
+      },
+      (err) => {
+        res.json({ success });
+      }
+    );
+  });
+};
