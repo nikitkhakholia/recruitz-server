@@ -370,6 +370,8 @@ exports.getAllUsers = (req, res) => {
           (err, student) => {
             // console.log(student);
             student = student[0];
+            console.log("wq"+student);
+
             data.push([
               login.id,
               login.email,

@@ -1,12 +1,15 @@
 // import { v4 as uuid } from 'uuid';
 // const  { v4: uuidv4 } = require("uuid");
+const formidable = require("formidable");
+
 // let Jobs = [{    id: 20,
 // type: "Intern",
 // location: "mumbai",
 // company: "wipro",
 // role: "frontdev"}];
 
-const async = require("async")
+const async = require("async");
+const { readExcelFile } = require("../Services/ExcelService");
 
 exports.getJobs = (req, res) => {
     database.query("SELECT * from job_mst", (err, job_msts)=>{
@@ -65,3 +68,78 @@ exports.getJobs = (req, res) => {
 //      console.log(`Jobname has been updated to ${req.body.Jobname}.age has been updated to ${req.body.age}`)
 //  };
 //
+
+
+exports.addJobsByExcel = (req, res) =>{
+var success = {result:[]};
+var form=new formidable.IncomingForm();
+form.parse(req,async(err,fields,files)=>{
+    var data=await readExcelFile(files.file1);
+    console.log(data);
+    async.forEach(
+        data,
+        (job,done)=>{
+            console.log('inside');
+            //insert
+            if(!job.Id){//////job or mst
+                console.log(err);
+                console.log("foundError0");
+                database.query(
+                    "INSERT into job_mst(type,location,company,role) values(?,?,?,?);",
+                    [
+                        job["Type"],
+                        job["Location"],
+                        job["Company"],
+                        job["Role"],
+                    ],
+                    (err, jobInsert)=>{
+                        console.log(err);
+                        console.log("foundError1");
+                        if(err) {
+                            success.result.push({
+                                job: job,
+                                error: err,
+                            });
+                            done();
+                        } else {
+                            console.log(err);
+                            console.log("foundError2");
+                            console.log(jobInsert);
+                            database.query(
+                                "INSERT INTO job(job_id, status,description) VALUES(?,?,?)",
+                                [
+                                    jobInsert.insertId,///////
+                                    job["Status"],
+                                    job["Description"],
+                                ],
+                                (err, jobDescInsert)=>{
+                                    if(err) {
+                                        success.result.push({
+                                            job: job,
+                                            error: err,      //
+                                        });
+                                        done();
+                                    } else {
+                                        success.result.push({
+                                            job: job,
+                                            error: "Job Added",
+                                        });
+                                        done();
+                                    }
+                                }
+                            )
+                        }
+                    }
+                )
+            }
+            // update
+            else{
+                done()
+            }
+        },
+        (err)=>{
+            res.json({success})
+        }
+    )
+})
+};
