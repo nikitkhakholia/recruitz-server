@@ -1,36 +1,54 @@
 // import { v4 as uuid } from 'uuid';
 // const  { v4: uuidv4 } = require("uuid");
-let Jobs = [{xxx:'ddd',vh:'abc'}];
+// let Jobs = [{    id: 20,
+// type: "Intern",
+// location: "mumbai",
+// company: "wipro",
+// role: "frontdev"}];
+
+const async = require("async")
 
 exports.getJobs = (req, res) => {
     database.query("SELECT * from job_mst", (err, job_msts)=>{
+        console.log(job_msts);
         if(err) return res.status(400).json({success:0, error: err})
-        for (let index = 0; index < job_msts.length; index++) {
-            database.query("SELECT * from job where job_id="+job_msts[index].id, (err, jobs)=>{
+        async.forEachOf(job_msts, (jmst,index, done)=>{
+            database.query("SELECT * from job where job_id="+jmst.id, (err, jobs)=>{
                 job_msts[index].job=jobs[0]
+                done()
             })
-            
-        }
-        res.json(job_msts)
+        }, (err)=>{
+            res.json({data:job_msts, success:1})
+        })
+        
     })
     // console.log(`Jobs in the database: ${Jobs}`);
 
     // res.send(Jobs);
 }
 
-module.exports.createJob = (req, res) => {   
-     const Job = req.body;
+// module.exports.createJob = (req, res) => {   
+//      const Job12 = req.body;
 
-    //  Jobs.push({...Job, id: uuid()});
+//     Jobs.push(Job12);
     
-     console.log(`Job [${Job.Jobname}] added to the database.`);
- };
+//      console.log(`Job added to the database.`);
+//      res.send(`Job added to the database.`);
+//      res.send(Jobs);
+//  };
 
- module.exports.getJob = (req, res) => {
-     res.send(req.params.id)
+//  exports.findJob = (req, res) => {
+//     //  res.send(req.params.id)
+//     // find  = req.data;
+//      database.query('SELECT * from job_mst where id= '+req.params.id,(err,rows,field)=>{
+//          if(!err)
+//             res.send(rows);
+//         else
+//             res.send(err);
+//      });
+//  };
 
-     console.log(`Jobs in the database: ${Jobs}`);
- };
+//  module.exports.findJob: function()
 
 //  module.exports=  deleteJob = (req, res) => { 
 //      console.log(`Job with id ${req.params.id} has been deleted`);
@@ -46,3 +64,4 @@ module.exports.createJob = (req, res) => {
 
 //      console.log(`Jobname has been updated to ${req.body.Jobname}.age has been updated to ${req.body.age}`)
 //  };
+//
