@@ -49,13 +49,13 @@ exports.generateOtp = async (req, res) => {
       if (err) return res.json({ error: err });
       // notify user with email
       // await
-      // sendEmail(
-      //   req.query.email,
-      //   "OTP Requested",
-      //   "Otp is " + otp,
-      //   "noreply@noreply.com",
-      //   null
-      // );
+      await sendEmail(
+        req.query.email,
+        "OTP Requested", 
+        "Otp is " + otp,
+        "noreply@noreply.com",
+        null
+      );
 
       // return success response
       res.json({ success: 1 });
@@ -370,7 +370,6 @@ exports.getAllUsers = (req, res) => {
           (err, student) => {
             // console.log(student);
             student = student[0];
-            console.log("wq"+student);
 
             data.push([
               login.id,
@@ -433,12 +432,12 @@ exports.addUsersByExcel = (req, res) => {
                 "INSERT INTO student(login_id, bio, about, github, linkedin, phone, skills) VALUES(?,?,?,?,?,?,?)",
                 [
                   loginInsert.insertId,
-                  user["Bio"],
-                  user["About"],
-                  user["Github"],
-                  user["Linked In"],
-                  parseInt(user["Phone"]),
-                  user["Skills"],
+                  user["Bio"]?user["Bio"]:null,
+                  user["About"]?user["About"]:null,
+                  user["Github"]?user["Github"]:null,
+                  user["Linked In"]?user["Linked In"]:null,
+                  parseInt(user["Phone"])?parseInt(user["Phone"]):null,
+                  user["Skills"]?user["Skills"]:null,
                 ],
                 (err, student) => {
                   if (err) {

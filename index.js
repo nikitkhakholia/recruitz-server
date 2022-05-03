@@ -25,15 +25,10 @@ global.database = mysql.createConnection({
 const express = require("express");
 const app = express();
 
-const cors = require("cors")
+const cors = require("cors");
 app.use(cors())
 
 app.use(require("body-parser").json())
-// app.use((req, res, next)=>{
-//   setTimeout(()=>{
-//     next()
-//   }, 2000)
-// })
 app.use(require("./Routes/User"));
 app.use(require("./Routes/Application"))
 app.use(require("./Routes/Job"));
