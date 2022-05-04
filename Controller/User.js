@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const xl = require("excel4node");
 const { sendExcelFile, readExcelFile } = require("../Services/ExcelService");
 const formidable = require("formidable");
+var expressJwt = require("express-jwt");
 
 const encryptPlainPassowrd = (plainpassword, key) => {
   return cyrpto.createHmac("sha256", key).update(plainpassword).digest("hex");
@@ -186,7 +187,7 @@ exports.signIn = async (req, res) => {
           login[0].encry_pass
         ) {
           var token = jwt.sign(
-            { id: login[0].id, email: login[0].email, name: login[0].name },
+            { id: login[0].id, email: login[0].email, name: login[0].name, encry_key: login[0].encry_key },
             process.env.TOKEN_KEY
           );
           database.query(
@@ -200,6 +201,7 @@ exports.signIn = async (req, res) => {
                   email: login[0].email,
                   id: login[0].id,
                   name: login[0].name,
+                  admin: admin[0].id
                 });
               else {
                 database.query(
@@ -214,7 +216,7 @@ exports.signIn = async (req, res) => {
                       email: login[0].email,
                       id: login[0].id,
                       name: login[0].name,
-                      data: student[0],
+                      student: student[0],
                     });
                   }
                 );
@@ -252,37 +254,51 @@ exports.getUserById = (req, res, next, id) => {
   var query = "SELECT * from login WHERE id = " + id;
   database.query(query, (err, login) => {
     if (!err) {
-      var query = "SELECT * FROM student WHERE login_id = " + login[0].id;
-      database.query(query, (err, student) => {
-        if (err)
-          return res.status(400).json({ status: 0, message: err.message });
-        if (student[0]) {
-          req.profile = login[0];
-          req.profile.student = student[0];
-          var query = `SELECT * FROM recruitz.certificate WHERE student_id = ${student[0].id};`;
-          database.query(query, (err, certificate) => {
-            if (certificate.length > 0)
-              req.profile.student.certificates = certificate;
-            database.query(
-              "SELECT * FROM recruitz.work_experience WHERE student_id=" +
-                student[0].id,
-              (err, workExperience) => {
-                if (workExperience.length > 0)
-                  req.profile.student.workExperiences = workExperience;
+      database.query("SELECT * FROM admin WHERE login_id="+login[0].id,(err, admin)=>{
+        if(admin[0]){
+          req.profile=login[0]
+          req.profile.admin=admin[0]
+          next()
+        }else{
+          var query = "SELECT * FROM student WHERE login_id = " + login[0].id;
+          database.query(query, (err, student) => {
+            if (err)
+              return res.status(400).json({ status: 0, message: err.message });
+            if (student[0]) {
+              req.profile = login[0];
+              req.profile.student = student[0];
+              var query = `SELECT * FROM recruitz.certificate WHERE student_id = ${student[0].id};`;
+              database.query(query, (err, certificate) => {
+                if (certificate.length > 0)
+                  req.profile.student.certificates = certificate;
                 database.query(
-                  "SELECT * FROM recruitz.education WHERE student_id=" +
+                  "SELECT * FROM recruitz.work_experience WHERE student_id=" +
                     student[0].id,
-                  (err, education) => {
-                    if (education.length > 0)
-                      req.profile.student.educations = education;
-                    next();
+                  (err, workExperience) => {
+                    if (workExperience.length > 0)
+                      req.profile.student.workExperiences = workExperience;
+                    database.query(
+                      "SELECT * FROM recruitz.education WHERE student_id=" +
+                        student[0].id,
+                      (err, education) => {
+                        if (education.length > 0)
+                          req.profile.student.educations = education;
+                        next();
+                      }
+                    );
                   }
                 );
-              }
-            );
+              });
+            }
           });
         }
-      });
+      })
+
+
+
+
+
+      
     } else {
       return res.status(400).json({ status: 0, message: err.message });
     }
@@ -465,3 +481,23 @@ exports.addUsersByExcel = (req, res) => {
     );
   });
 };
+exports.checkToken=expressJwt({
+  secret: process.env.TOKEN_KEY,
+  algorithms: ["HS256"],
+  requestProperty: "auth",
+})
+exports.validateToken=(req, res, next)=>{
+  if(req.profile && req.auth && req.profile.encry_key==req.auth.encry_key){
+    next()
+  }else{
+    res.status(400).json({success:0, message: "Unauthorized Access."})
+  }
+
+}
+exports.isAdmin=(req, res, next)=>{
+  if(req.profile.admin.id){
+    next()
+  }else{
+    res.status(400).json({status:0, message: "LOL!...Admin...!!"})
+  }
+}

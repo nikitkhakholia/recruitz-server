@@ -12,6 +12,8 @@ const {
   addCertificateForStudenr,
   getAllUsers,
   addUsersByExcel,
+  checkToken,
+  validateToken,
 } = require("../Controller/User");
 const router = express.Router();
 
@@ -28,5 +30,9 @@ router.put("/user/workexp/:id", addWEForStudenr);
 router.put("/user/edu/:id", addEducationForStudenr);
 router.get("/users/:id", getAllUsers);
 router.post("/users/:id", addUsersByExcel);
+router.post("/usertest/:id", checkToken, validateToken,(req,res)=>{
+  console.log('here');
+  res.json("xxx")
+});
 
 module.exports = router;
