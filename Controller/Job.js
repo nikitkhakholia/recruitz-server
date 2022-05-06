@@ -22,6 +22,7 @@ exports.getJobs = (req, res) => {
             })
         }, (err)=>{
             res.json({data:job_msts, success:1})
+            // res.json({data:job, success:1})
         })
         
     })
