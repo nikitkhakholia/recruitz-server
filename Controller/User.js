@@ -391,8 +391,8 @@ exports.getAllUsers = (req, res) => {
         database.query(
           "SELECT * from student WHERE login_id=" + login.id,
           (err, student) => {
-            // console.log(student);
-            student = student[0];
+            if(student.length>0){
+              student = student[0];
 
             data.push([
               login.id,
@@ -405,6 +405,7 @@ exports.getAllUsers = (req, res) => {
               student.phone,
               student.skills,
             ]);
+            }
             done();
           }
         );
