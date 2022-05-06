@@ -52,7 +52,7 @@ exports.generateOtp = async (req, res) => {
       // await
       await sendEmail(
         req.query.email,
-        "OTP Requested", 
+        "OTP Requested",
         "Otp is " + otp,
         "noreply@noreply.com",
         null
@@ -187,7 +187,12 @@ exports.signIn = async (req, res) => {
           login[0].encry_pass
         ) {
           var token = jwt.sign(
-            { id: login[0].id, email: login[0].email, name: login[0].name, encry_key: login[0].encry_key },
+            {
+              id: login[0].id,
+              email: login[0].email,
+              name: login[0].name,
+              encry_key: login[0].encry_key,
+            },
             process.env.TOKEN_KEY
           );
           database.query(
@@ -201,7 +206,7 @@ exports.signIn = async (req, res) => {
                   email: login[0].email,
                   id: login[0].id,
                   name: login[0].name,
-                  admin: admin[0].id
+                  admin: admin[0].id,
                 });
               else {
                 database.query(
@@ -253,52 +258,54 @@ exports.updateUserData = (req, res) => {
 exports.getUserById = (req, res, next, id) => {
   var query = "SELECT * from login WHERE id = " + id;
   database.query(query, (err, login) => {
+    if (login.length == 0) {
+      return res.status(400).json({ success: 0, message: "User Not Found." });
+    }
     if (!err) {
-      database.query("SELECT * FROM admin WHERE login_id="+login[0].id,(err, admin)=>{
-        if(admin[0]){
-          req.profile=login[0]
-          req.profile.admin=admin[0]
-          next()
-        }else{
-          var query = "SELECT * FROM student WHERE login_id = " + login[0].id;
-          database.query(query, (err, student) => {
-            if (err)
-              return res.status(400).json({ status: 0, message: err.message });
-            if (student[0]) {
-              req.profile = login[0];
-              req.profile.student = student[0];
-              var query = `SELECT * FROM recruitz.certificate WHERE student_id = ${student[0].id};`;
-              database.query(query, (err, certificate) => {
-                if (certificate.length > 0)
-                  req.profile.student.certificates = certificate;
-                database.query(
-                  "SELECT * FROM recruitz.work_experience WHERE student_id=" +
-                    student[0].id,
-                  (err, workExperience) => {
-                    if (workExperience.length > 0)
-                      req.profile.student.workExperiences = workExperience;
-                    database.query(
-                      "SELECT * FROM recruitz.education WHERE student_id=" +
-                        student[0].id,
-                      (err, education) => {
-                        if (education.length > 0)
-                          req.profile.student.educations = education;
-                        next();
-                      }
-                    );
-                  }
-                );
-              });
-            }
-          });
+      database.query(
+        "SELECT * FROM admin WHERE login_id=" + login[0].id,
+        (err, admin) => {
+          if (admin[0]) {
+            req.profile = login[0];
+            req.profile.admin = admin[0];
+            next();
+          } else {
+            var query = "SELECT * FROM student WHERE login_id = " + login[0].id;
+            database.query(query, (err, student) => {
+              if (err)
+                return res
+                  .status(400)
+                  .json({ status: 0, message: err.message });
+              if (student[0]) {
+                req.profile = login[0];
+                req.profile.student = student[0];
+                var query = `SELECT * FROM recruitz.certificate WHERE student_id = ${student[0].id};`;
+                database.query(query, (err, certificate) => {
+                  if (certificate.length > 0)
+                    req.profile.student.certificates = certificate;
+                  database.query(
+                    "SELECT * FROM recruitz.work_experience WHERE student_id=" +
+                      student[0].id,
+                    (err, workExperience) => {
+                      if (workExperience.length > 0)
+                        req.profile.student.workExperiences = workExperience;
+                      database.query(
+                        "SELECT * FROM recruitz.education WHERE student_id=" +
+                          student[0].id,
+                        (err, education) => {
+                          if (education.length > 0)
+                            req.profile.student.educations = education;
+                          next();
+                        }
+                      );
+                    }
+                  );
+                });
+              }
+            });
+          }
         }
-      })
-
-
-
-
-
-      
+      );
     } else {
       return res.status(400).json({ status: 0, message: err.message });
     }
@@ -404,14 +411,14 @@ exports.getAllUsers = (req, res) => {
       },
       (err) => {
         if (err) console.log(err);
-        if (req.query.download == "true")
+        if (req.query.download == "true") {
           sendExcelFile(
             data,
             cols,
             res,
             "Student@" + new Date().toLocaleString()
           );
-        else res.json({ data: data, success: 1 });
+        } else res.json({ data: data, success: 1 });
       }
     );
   });
@@ -448,12 +455,12 @@ exports.addUsersByExcel = (req, res) => {
                 "INSERT INTO student(login_id, bio, about, github, linkedin, phone, skills) VALUES(?,?,?,?,?,?,?)",
                 [
                   loginInsert.insertId,
-                  user["Bio"]?user["Bio"]:null,
-                  user["About"]?user["About"]:null,
-                  user["Github"]?user["Github"]:null,
-                  user["Linked In"]?user["Linked In"]:null,
-                  parseInt(user["Phone"])?parseInt(user["Phone"]):null,
-                  user["Skills"]?user["Skills"]:null,
+                  user["Bio"] ? user["Bio"] : null,
+                  user["About"] ? user["About"] : null,
+                  user["Github"] ? user["Github"] : null,
+                  user["Linked In"] ? user["Linked In"] : null,
+                  parseInt(user["Phone"]) ? parseInt(user["Phone"]) : null,
+                  user["Skills"] ? user["Skills"] : null,
                 ],
                 (err, student) => {
                   if (err) {
@@ -481,23 +488,80 @@ exports.addUsersByExcel = (req, res) => {
     );
   });
 };
-exports.checkToken=expressJwt({
+exports.checkToken = expressJwt({
   secret: process.env.TOKEN_KEY,
   algorithms: ["HS256"],
   requestProperty: "auth",
-})
-exports.validateToken=(req, res, next)=>{
-  if(req.profile && req.auth && req.profile.encry_key==req.auth.encry_key){
-    next()
-  }else{
-    res.status(400).json({success:0, message: "Unauthorized Access."})
+});
+exports.validateToken = (req, res, next) => {
+  if (req.profile && req.auth && req.profile.encry_key == req.auth.encry_key) {
+    next();
+  } else {
+    res.status(400).json({ success: 0, message: "Unauthorized Access." });
   }
+};
+exports.isAdmin = (req, res, next) => {
+  if (req.profile.admin.id) {
+    next();
+  } else {
+    res.status(400).json({ status: 0, message: "LOL!...Admin...!!" });
+  }
+};
+exports.forgotPassword = (req, res) => {
+  if (req.body.otp && req.body.email && req.body.password) {
+    database.query(
+      "SELECT otp FROM otp WHERE email='" +
+        req.body.email +
+        "' ORDER BY last_changed DESC",
+      (err, otp) => {
+        if (otp[0].otp == req.body.otp) {
+          database.query(
+            "SELECT * FROM login WHERE email='" + req.body.email + "'",
+            (err, login) => {
+              if (err)
+                return res
+                  .status(400)
+                  .json({ success: 0, error: "User not found." });
+              database.query(
+                "UPDATE login SET encry_pass = '" +
+                  encryptPlainPassowrd(req.body.password, login[0].encry_key) +
+                  "' WHERE id = " +
+                  login[0].id,
+                (err, update) => {
+                  if (!err) return res.json({ success: 1, message: update });
+                  else
+                    return res
+                      .status(400)
+                      .json({ success: 0, message: err.message });
+                }
+              );
+            }
+          );
+        }
+      }
+    );
+  }
+};
+exports.getUser1 = (req, res) => {
+  // if(req.query.user){
+  // console.log(req.query.user);
+  // this.getUserById(req, res, (req1,res1)=>{
 
-}
-exports.isAdmin=(req, res, next)=>{
-  if(req.profile.admin.id){
-    next()
-  }else{
-    res.status(400).json({status:0, message: "LOL!...Admin...!!"})
+  //   console.log(req1.profile);
+  //   if(req1.profile.student){
+  //     this.getStudentData(req1,res1)
+  //   }else{
+  //     res.json({success:0, error:"User Not Found."})
+  //   }
+  // }, req.query.user)
+  // }
+
+  console.log(req.profile.student);
+  if (req.profile && req.profile.student) {
+    delete req.encry_key;
+    delete req.encry_pass;
+    res.json({ success: 1, data: req.profile });
+  } else {
+    res.status(400).json({ success: 0, message: "User Not Found." });
   }
-}
+};

@@ -14,6 +14,9 @@ const {
   addUsersByExcel,
   checkToken,
   validateToken,
+  isAdmin,
+  forgotPassword,
+  getUser1,
 } = require("../Controller/User");
 const router = express.Router();
 
@@ -23,16 +26,21 @@ router.post("/createLogin", addUser);
 router.post("/login", signIn);
 
 router.param("id", getUserById);
-router.put("/user/:id", updateUserData);
-router.get("/user/:id", getStudentData);
-router.put("/user/cer/:id", addCertificateForStudenr);
-router.put("/user/workexp/:id", addWEForStudenr);
-router.put("/user/edu/:id", addEducationForStudenr);
-router.get("/users/:id", getAllUsers);
-router.post("/users/:id", addUsersByExcel);
-router.post("/usertest/:id", checkToken, validateToken,(req,res)=>{
-  console.log('here');
-  res.json("xxx")
-});
+router.put("/user/:id", checkToken, validateToken, updateUserData);
+router.get("/user/:id", checkToken, validateToken, getStudentData);
+router.put(
+  "/user/cer/:id",
+  checkToken,
+  validateToken,
+  addCertificateForStudenr
+);
+router.put("/user/workexp/:id", checkToken, validateToken, addWEForStudenr);
+router.put("/user/edu/:id", checkToken, validateToken, addEducationForStudenr);
+router.get("/users/:id", checkToken, validateToken, isAdmin, getAllUsers);
+// router.get("/users/:id", isAdmin, getAllUsers);
+router.post("/users/:id", checkToken, validateToken, isAdmin, addUsersByExcel); 
+// router.post("/users/:id", isAdmin, addUsersByExcel); 
+router.put("/forgotpassword",forgotPassword); 
+router.get("/user1/:id", getUser1); 
 
 module.exports = router;
