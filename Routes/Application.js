@@ -1,5 +1,5 @@
 const express = require("express");
-const {  getApplicationMstData } = require("../Controller/Application");
+const {  getApplicationMstData, createApplication } = require("../Controller/Application");
 const { getUserById } = require("../Controller/User");
 const { getAllUserApplications } = require("../Controller/Application");
 const { sendExcelFile } = require("../Services/ExcelService");
@@ -21,7 +21,7 @@ router.get("/apps/:userId", (req, res)=>{
         getAllUserApplications(req, res)
     }
 });
-
+router.post("/application/:userId",createApplication)
 
 
 module.exports=router

@@ -318,7 +318,7 @@ exports.getStudentData = (req, res) => {
 };
 exports.addEducationForStudenr = (req, res) => {
   var query =
-    "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`,`start_date`) VALUES (?, ?, ?, ?, ?, ?,?)";
+    "INSERT INTO `recruitz`.`education` (`institute_name`, `specialization`, `end_date`, `grade`, `degree`, `student_id`,`start_date`, `reg_no`) VALUES (?, ?, ?, ?, ?, ?,?,?)";
   database.query(
     query,
     [
@@ -329,6 +329,7 @@ exports.addEducationForStudenr = (req, res) => {
       req.body.deg,
       req.profile.student.id,
       req.body.sd,
+      req.body.reg
     ],
     (err, result) => {
       if (err) return res.status(400).json({ status: 0, message: err.message });

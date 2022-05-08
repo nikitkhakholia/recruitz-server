@@ -79,6 +79,8 @@ USE recruitz;
   CONSTRAINT `studentId_fk` FOREIGN KEY (`student_id`) REFERENCES `student` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
 
+ALTER TABLE `recruitz`.`education` 
+ADD COLUMN `reg_no` VARCHAR(15) NOT NULL AFTER `start_date`;
 
 
 'CREATE TABLE `application_mst` (

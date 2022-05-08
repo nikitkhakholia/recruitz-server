@@ -225,3 +225,27 @@ exports.getApplicationsExcel = (req, res) => {
 //     );
 //   });
 // };
+
+
+
+
+exports.createApplication = (req, res) => {
+  database.query(
+    "INSERT INTO application_mst(student_id, job_id) VALUES(?,?)",
+    [req.profile.student.id, req.query.jobid],
+    (err, insert) => {
+      if (err)
+        return res.status(400).json({ success: 0, message: err.message });
+      database.query(
+        "INSERT into application(application_id,status)VALUES(?,?)",
+        [insert.insertId, "Applied"],
+        (err, insert1) => {
+          if (err)
+            return res.status(400).json({ success: 0, message: err.message });
+          res.json({ success: 1 });
+        }
+      );
+
+    }
+  );
+};
