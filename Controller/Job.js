@@ -80,22 +80,23 @@ form.parse(req,async(err,fields,files)=>{
     async.forEach(
         data,
         (job,done)=>{
-            console.log('inside');
+            // console.log('inside');
             //insert
             if(!job.Id){//////job or mst
-                console.log(err);
-                console.log("foundError0");
+                // console.log(err);
+                // console.log("foundError0");
                 database.query(
-                    "INSERT into job_mst(type,location,company,role) values(?,?,?,?);",
+                    "INSERT into job_mst(type,location,company,role, company_image) values(?,?,?,?,?);",
                     [
                         job["Type"],
                         job["Location"],
                         job["Company"],
                         job["Role"],
+                        job["Company Image"],
                     ],
                     (err, jobInsert)=>{
-                        console.log(err);
-                        console.log("foundError1");
+                        // console.log(err);
+                        // console.log("foundError1");
                         if(err) {
                             success.result.push({
                                 job: job,
@@ -103,9 +104,9 @@ form.parse(req,async(err,fields,files)=>{
                             });
                             done();
                         } else {
-                            console.log(err);
-                            console.log("foundError2");
-                            console.log(jobInsert);
+                            // console.log(err);
+                            // console.log("foundError2");
+                            // console.log(jobInsert);
                             database.query(
                                 "INSERT INTO job(job_id, status,description) VALUES(?,?,?)",
                                 [

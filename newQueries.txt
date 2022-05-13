@@ -130,3 +130,7 @@ CREATE TABLE recruitz.job (
 
 ALTER TABLE `recruitz`.`job` 
 CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+
+
+ALTER TABLE `recruitz`.`job_mst` 
+ADD COLUMN `company_image` TEXT(5000) NULL DEFAULT NULL AFTER `role`;
