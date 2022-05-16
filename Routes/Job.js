@@ -1,7 +1,7 @@
 const express = require("express");
 
-const { getJobs, addJobsByExcel,  }  = require('../Controller/Job') ;
-const { getUserById } = require("../Controller/User");
+const { getJobs, addJobsByExcel, updateJobs,  }  = require('../Controller/Job') ;
+const { getUserById, checkToken, validateToken, isAdmin } = require("../Controller/User");
 
 const router = express.Router();
 
@@ -16,6 +16,7 @@ router.get('/listJobs', getJobs)
 // router.patch('/updJob/:id', updateJob); //do
 router.param("id", getUserById)
 router.post("/jobs/:id", addJobsByExcel);
+router.put("/jobs/:id", checkToken, validateToken, isAdmin, updateJobs);
 
 
 module.exports= router
