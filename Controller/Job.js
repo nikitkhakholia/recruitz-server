@@ -10,6 +10,7 @@ const formidable = require("formidable");
 
 const async = require("async");
 const { readExcelFile } = require("../Services/ExcelService");
+const { sendEmail } = require("../Services/EmailService");
 
 exports.getJobs = (req, res) => {
   database.query("SELECT * from job_mst", (err, job_msts) => {
@@ -145,7 +146,12 @@ exports.addJobsByExcel = (req, res) => {
           done();
         }
       },
-      (err) => {
+      async(err) => {
+        await sendEmail(
+          req.profile.email,"Jobs Created",
+          "Jobs created successfully.",
+          "noreply@noreply.com",null
+        );
         res.json({ success });
       }
     );
@@ -155,8 +161,13 @@ exports.addJobsByExcel = (req, res) => {
 exports.updateJobs = (req, res) => {
     console.log();
   var query = `UPDATE job SET ${req.query.key} = '${req.query.value}' WHERE id=${req.query.id}`;
-  database.query(query, (err, updateRes) => {
+  database.query(query, async(err, updateRes) => {
     if (err) return res.status(400).json({ success: 0, error: err });
+    await sendEmail(
+      req.profile.email,"Job Updated",
+      "Job Updated Successfully.",
+      "noreply@noreply.com",null
+    );
     res.json({ status: 1, data: updateRes });
   });
 };

@@ -3,6 +3,7 @@ const res = require("express/lib/response");
 
 const xl = require("excel4node");
 const { sendExcelFile } = require("../Services/ExcelService");
+const { sendEmail } = require("../Services/EmailService");
 
 exports.getApplicationMstData = (req, res) => {
   var query =
@@ -143,15 +144,15 @@ exports.getApplicationsExcel = (req, res) => {
           application_mst.student = await getStudentDetails(
             application_mst.student_id
           );
-          data.push([application_mst.id, 
+          data.push([
+            application_mst.id,
             application_mst.student.login.email,
             application_mst.student.login.name,
             application_mst.job.role,
             application_mst.job.company,
             application_mst.job.type,
             application_mst.job.location,
-            application_mst.application.status
-
+            application_mst.application.status,
           ]);
           done();
         });
@@ -226,9 +227,6 @@ exports.getApplicationsExcel = (req, res) => {
 //   });
 // };
 
-
-
-
 exports.createApplication = (req, res) => {
   database.query(
     "INSERT INTO application_mst(student_id, job_id) VALUES(?,?)",
@@ -239,13 +237,21 @@ exports.createApplication = (req, res) => {
       database.query(
         "INSERT into application(application_id,status)VALUES(?,?)",
         [insert.insertId, "Applied"],
-        (err, insert1) => {
-          if (err)
+        async (err, insert1) => {
+          if (err) {
             return res.status(400).json({ success: 0, message: err.message });
+          }
+
+          await sendEmail(
+            req.profile.email,
+            "Application Submitted.",
+            "Hii, Your application has been successfully submitted.",
+            "noreply@noreply.com",
+            null
+          );
           res.json({ success: 1 });
         }
       );
-
     }
   );
 };
