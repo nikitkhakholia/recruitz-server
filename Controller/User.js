@@ -258,10 +258,10 @@ exports.updateUserData = (req, res) => {
 exports.getUserById = (req, res, next, id) => {
   var query = "SELECT * from login WHERE id = " + id;
   database.query(query, (err, login) => {
-    if (login.length == 0) {
-      return res.status(400).json({ success: 0, message: "User Not Found." });
-    }
     if (!err) {
+            if (login.length == 0) {
+        return res.status(400).json({ success: 0, message: "User Not Found." });
+      }
       database.query(
         "SELECT * FROM admin WHERE login_id=" + login[0].id,
         (err, admin) => {
